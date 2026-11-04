@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestavia Motoristas – Estacionamento</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --primary: #2563eb;
+    --green: #16a34a;
+    --yellow: #ca8a04;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    background: #fff;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { margin: 0; font-size: 1.4rem; font-weight: 800; }
+  .tabs {
+    display: flex; gap: 8px; background: #fff; padding: 8px 16px;
+    border-bottom: 1px solid var(--border); overflow-x: auto;
+  }
+  .tab {
+    padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
+    color: var(--muted); cursor: pointer; white-space: nowrap;
+  }
+  .tab.active { background: #eff6ff; color: var(--primary); }
+  .container { padding: 16px; max-width: 1400px; margin: 0 auto; }
+  .topo {
+    background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .topo h2 { margin: 0 0 12px 0; font-size: 1.25rem; font-weight: 800; }
+  .seletor { display: flex; gap: 8px; margin-bottom: 12px; }
+  .opcao {
+    flex: 1; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px;
+    text-align: center; font-weight: 800; cursor: pointer; background: #fff;
+  }
+  .opcao.hoje { border-color: #16a34a; color: #16a34a; }
+  .opcao.hoje.ativa { background: #16a34a; color: #fff; }
+  .opcao.ontem { border-color: #dc2626; color: #dc2626; }
+  .opcao.ontem.ativa { background: #dc2626; color: #fff; }
+  .search-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .search-input {
+    flex: 1; min-width: 220px; padding: 10px 14px; border: 1px solid #cbd5e1;
+    border-radius: 8px; font-size: 15px; outline: none;
+  }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  .status-msg { font-size: 13px; color: var(--muted); min-height: 20px; }
+  .faixa { border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; color: #fff; font-weight: 800; }
+  .faixa.hoje { background: #16a34a; }
+  .faixa.ontem { background: #dc2626; }
+  .parques { display: flex; flex-wrap: wrap; gap: 16px; }
+  .parque {
+    background: #fff; border-radius: 12px; border: 1px solid var(--border);
+    padding: 12px; flex: 1 1 420px;
+  }
+  .parque-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .parque-nome { font-weight: 700; font-size: 15px; }
+  .grelha { border: 2px solid #111; border-bottom: none; }
+  .fila { display: flex; border-bottom: 3px solid #111; }
+  .num-fila {
+    width: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc;
+  }
+  .lugares { display: flex; gap: 6px; padding: 4px; flex: 1; }
+  .lugar { width: 90px; min-height: 56px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .bus {
+    width: 82px; height: 46px; background: #fff; border: 1.5px solid #334155;
+    border-top-left-radius: 4px; border-top-right-radius: 14px;
+    border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
+    position: relative; display: flex; align-items: flex-end; padding: 4px 6px 5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .bus.inop { background: #fee2e2; border-color: #dc2626; }
+  .bus.ultimo { background: #fef3c7; border-color: #d97706; }
+  .bus.destacado { border-color: var(--yellow); border-width: 2.5px; box-shadow: 0 0 0 2px rgba(202,138,4,0.25); }
+  .janelas { position: absolute; top: 4px; left: 5px; right: 16px; height: 12px; display: flex; gap: 3px; }
+  .janela { flex: 1; background: #93c5fd; border-radius: 2px; }
+  .brisa { position: absolute; top: 3px; right: 2px; width: 12px; height: 15px; background: #93c5fd; border-top-right-radius: 10px; border-bottom-left-radius: 2px; }
+  .info { display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 1; }
+  .bus-num { font-size: 14px; font-weight: 800; color: #0f172a; }
+  .tag { font-size: 9px; font-weight: 800; color: #fff; background: #16a34a; padding: 1px 5px; border-radius: 4px; }
+  .tag.inop { background: #dc2626; }
+  .tag.ultimo { background: #d97706; }
+  .seta-verde {
+    position: absolute; left: -42px; top: 50%; transform: translateY(-50%);
+    font-size: 36px; color: var(--green); font-weight: bold;
+    text-shadow: 0 0 6px white, 0 0 3px white; pointer-events: none;
+    animation: pulse 1.2s ease-in-out infinite; z-index: 10;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translateY(-50%) scale(1); opacity: 1; }
+    50% { transform: translateY(-50%) scale(1.15); opacity: 0.85; }
+  }
+  .empty-slot { width: 82px; height: 46px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc; }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gestavia Motoristas</h1>
+  <div style="font-size:13px;color:#64748b;">Estacionamento</div>
+</header>
+
+<div class="tabs">
+  <div class="tab">Dashboard</div>
+  <div class="tab">Limpezas</div>
+  <div class="tab">Combustível</div>
+  <div class="tab">Férias</div>
+  <div class="tab">Horários</div>
+  <div class="tab active">Estacionamento</div>
+  <div class="tab">Escala</div>
+  <div class="tab">Comunicados</div>
+  <div class="tab">Perfil</div>
+</div>
+
+<div class="container">
+  <div class="topo">
+    <h2>Estacionamento</h2>
+    <div class="seletor">
+      <div class="opcao ontem" id="btnOntem">Ontem</div>
+      <div class="opcao hoje ativa" id="btnHoje">Hoje</div>
+    </div>
+    <div class="search-row">
+      <input type="text" id="search" class="search-input" placeholder="Procurar autocarro (n.º)" inputmode="numeric">
+      <div class="status-msg" id="status">A carregar dados reais...</div>
+    </div>
+  </div>
+
+  <div class="faixa hoje" id="faixa">Hoje · Quarta-feira, 4 de novembro de 2026</div>
+
+  <div class="parques" id="parques"><div class="loading">A carregar estacionamento...</div></div>
+</div>
+
+<script>
+let data = null;
+let autocarrosMap = new Map();
+let lugaresMap = new Map();
+
+async function loadData() {
+  const res = await fetch('estacionamento-data.json');
+  data = await res.json();
+  autocarrosMap = new Map(data.autocarros.map(a => [a.id, a]));
+  lugaresMap = new Map();
+  data.lugares.forEach(l => {
+    lugaresMap.set(`${l.parque}|${l.fila}|${l.coluna}`, l.veiculoId);
+  });
+  document.getElementById('status').textContent = 'Dados carregados. Pesquisa um número de autocarro.';
+  render();
+}
+
+function getEstadoClass(estado) {
+  if (estado === 'inop') return 'inop';
+  if (estado === 'ultimo_recurso') return 'ultimo';
+  return '';
+}
+
+function getTag(estado) {
+  if (estado === 'inop') return 'INOP';
+  if (estado === 'ultimo_recurso') return 'UR';
+  return 'OP';
+}
+
+function render() {
+  const container = document.getElementById('parques');
+  container.innerHTML = '';
+
+  data.parques.forEach(p => {
+    const parqueEl = document.createElement('div');
+    parqueEl.className = 'parque';
+
+    const topo = document.createElement('div');
+    topo.className = 'parque-topo';
+    let ocupados = 0;
+    for (let f = 1; f <= p.filas; f++) {
+      for (let c = 1; c <= p.colunas; c++) {
+        if (lugaresMap.has(`${p.codigo}|${f}|${c}`)) ocupados++;
+      }
+    }
+    topo.innerHTML = `
+      <span class="parque-nome">${p.nome}</span>
+      <span style="font-size:12px;color:#64748b">${ocupados}/${p.filas * p.colunas}</span>
+    `;
+    parqueEl.appendChild(topo);
+
+    const grelha = document.createElement('div');
+    grelha.className = 'grelha';
+
+    for (let f = 1; f <= p.filas; f++) {
+      const fila = document.createElement('div');
+      fila.className = 'fila';
+
+      const num = document.createElement('div');
+      num.className = 'num-fila';
+      num.textContent = f;
+      fila.appendChild(num);
+
+      const lugares = document.createElement('div');
+      lugares.className = 'lugares';
+
+      for (let c = 1; c <= p.colunas; c++) {
+        const lugar = document.createElement('div');
+        lugar.className = 'lugar';
+
+        const veiculoId = lugaresMap.get(`${p.codigo}|${f}|${c}`);
+        const bus = veiculoId ? autocarrosMap.get(veiculoId) : null;
+
+        if (bus) {
+          const cls = getEstadoClass(bus.estado);
+          const busEl = document.createElement('div');
+          busEl.className = 'bus' + (cls ? ' ' + cls : '');
+          busEl.dataset.numero = bus.numero.replace(/^0+/, '') || bus.numero;
+          busEl.dataset.fullNumero = bus.numero;
+          busEl.innerHTML = `
+            <div class="janelas">
+              <div class="janela"></div><div class="janela"></div>
+              <div class="janela"></div><div class="janela"></div>
+            </div>
+            <div class="brisa"></div>
+            <div class="info">
+              <span class="bus-num">${bus.numero}</span>
+              <span class="tag${cls ? ' ' + cls : ''}">${getTag(bus.estado)}</span>
+            </div>
+          `;
+          lugar.appendChild(busEl);
+        } else {
+          lugar.innerHTML = '<div class="empty-slot"></div>';
+        }
+        lugares.appendChild(lugar);
+      }
+      fila.appendChild(lugares);
+      grelha.appendChild(fila);
+    }
+    parqueEl.appendChild(grelha);
+    container.appendChild(parqueEl);
+  });
+}
+
+function search(query) {
+  const num = query.replace(/\D/g, '').replace(/^0+/, '');
+  document.querySelectorAll('.bus').forEach(b => {
+    b.classList.remove('destacado');
+    const seta = b.querySelector('.seta-verde');
+    if (seta) seta.remove();
+  });
+
+  const status = document.getElementById('status');
+  if (!num) {
+    status.textContent = 'Escreve o número do autocarro para o localizar.';
+    status.style.color = '';
+    return;
+  }
+
+  const found = document.querySelector(`.bus[data-numero="${num}"]`) ||
+                document.querySelector(`.bus[data-full-numero="${num.padStart(3,'0')}"]`);
+
+  if (found) {
+    found.classList.add('destacado');
+    const seta = document.createElement('div');
+    seta.className = 'seta-verde';
+    seta.textContent = '➔';
+    found.appendChild(seta);
+    found.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    status.textContent = `Autocarro ${found.dataset.fullNumero} encontrado — seta verde a indicar.`;
+    status.style.color = '#16a34a';
+  } else {
+    status.textContent = `Nenhum autocarro estacionado com o n.º ${num}.`;
+    status.style.color = '#dc2626';
+  }
+}
+
+document.getElementById('search').addEventListener('input', (e) => search(e.target.value));
+
+document.getElementById('btnHoje').addEventListener('click', () => {
+  document.getElementById('btnHoje').classList.add('ativa');
+  document.getElementById('btnOntem').classList.remove('ativa');
+  document.getElementById('faixa').className = 'faixa hoje';
+  document.getElementById('faixa').textContent = 'Hoje · Quarta-feira, 4 de novembro de 2026';
+  document.getElementById('search').value = '';
+  search('');
+});
+
+document.getElementById('btnOntem').addEventListener('click', () => {
+  document.getElementById('btnOntem').classList.add('ativa');
+  document.getElementById('btnHoje').classList.remove('ativa');
+  document.getElementById('faixa').className = 'faixa ontem';
+  document.getElementById('faixa').textContent = 'Ontem · Terça-feira, 3 de novembro de 2026';
+  document.getElementById('search').value = '';
+  search('');
+});
+
+loadData();
+</script>
+</body>
+</html>
