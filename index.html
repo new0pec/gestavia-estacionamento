@@ -166,19 +166,73 @@
   <div style="font-size:13px;color:#64748b;">Estacionamento</div>
 </header>
 
-<div class="tabs">
-  <div class="tab">Dashboard</div>
-  <div class="tab">Limpezas</div>
-  <div class="tab">Combustível</div>
-  <div class="tab">Férias</div>
-  <div class="tab">Horários</div>
-  <div class="tab active">Estacionamento</div>
-  <div class="tab">Escala</div>
-  <div class="tab">Comunicados</div>
-  <div class="tab">Perfil</div>
+<div class="tabs" id="tabs">
+  <div class="tab" data-tab="dashboard">Dashboard</div>
+  <div class="tab" data-tab="limpezas">Limpezas</div>
+  <div class="tab" data-tab="combustivel">Combustível</div>
+  <div class="tab" data-tab="ferias">Férias</div>
+  <div class="tab" data-tab="horarios">Horários</div>
+  <div class="tab active" data-tab="estacionamento">Estacionamento</div>
+  <div class="tab" data-tab="escala">Escala</div>
+  <div class="tab" data-tab="comunicados">Comunicados</div>
+  <div class="tab" data-tab="perfil">Perfil</div>
 </div>
 
-<div class="container">
+<div id="view-dashboard" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Dashboard</h2>
+    <p>Resumo do dia · 4 de novembro de 2026</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px">
+      <div style="background:#eff6ff;padding:16px;border-radius:10px"><div style="font-size:28px;font-weight:800;color:#2563eb">38</div><div style="font-size:13px;color:#64748b">Autocarros em serviço</div></div>
+      <div style="background:#fef2f2;padding:16px;border-radius:10px"><div style="font-size:28px;font-weight:800;color:#dc2626">3</div><div style="font-size:13px;color:#64748b">INOP</div></div>
+      <div style="background:#f0fdf4;padding:16px;border-radius:10px"><div style="font-size:28px;font-weight:800;color:#16a34a">5</div><div style="font-size:13px;color:#64748b">Limpezas hoje</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="view-limpezas" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Limpezas</h2>
+    <p>Registo de limpezas de autocarros</p>
+    <div class="search-row" style="margin-top:12px"><input class="search-input" placeholder="N.º autocarro"></div>
+    <ul style="margin-top:16px;padding-left:20px;line-height:1.8">
+      <li>028 — Limpeza completa · 03/11 22:10</li>
+      <li>045 — Limpeza interior · 04/11 06:30</li>
+      <li>078 — Limpeza exterior · 04/11 14:15</li>
+    </ul>
+  </div>
+</div>
+
+<div id="view-combustivel" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Combustível</h2>
+    <p>Abastecimentos e consumos</p>
+    <div class="search-row" style="margin-top:12px"><input class="search-input" placeholder="N.º autocarro ou posto"></div>
+    <ul style="margin-top:16px;padding-left:20px;line-height:1.8">
+      <li>012 — 85 L · Posto Lisboa Norte · 04/11 07:40</li>
+      <li>033 — 120 L · Posto Setúbal · 03/11 19:20</li>
+    </ul>
+  </div>
+</div>
+
+<div id="view-ferias" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Férias</h2>
+    <p>Pedidos e saldo de férias</p>
+    <div style="margin-top:12px;background:#f8fafc;padding:14px;border-radius:8px">
+      <strong>Saldo disponível:</strong> 18 dias<br>
+      <strong>Próximo período:</strong> 20–24 de dezembro
+    </div>
+  </div>
+</div>
+
+<div id="view-horarios" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Horários</h2>
+    <p>Horários de serviço e folgas</p>
+    <div style="margin-top:12px;line-height:1.8">
+      <div>Hoje: 06:00 – 14:30 · Serviço 12</div>
+      <div>Amanhã: 14:00 – 22:30 · Serviço 7</div>
+    </div>
+  </div>
+</div>
+
+<div id="view-estacionamento" class="container tab-view">
   <div class="topo">
     <h2>Estacionamento</h2>
     <div class="seletor">
@@ -190,10 +244,42 @@
       <div class="status-msg" id="status">A carregar dados reais...</div>
     </div>
   </div>
-
   <div class="faixa hoje" id="faixa">Hoje · Quarta-feira, 4 de novembro de 2026</div>
-
   <div class="parques" id="parques"><div class="loading">A carregar estacionamento...</div></div>
+</div>
+
+<div id="view-escala" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Escala</h2>
+    <p>Escala de serviço da semana</p>
+    <div style="margin-top:12px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <tr style="background:#f1f5f9"><th style="padding:8px;text-align:left">Dia</th><th>Serviço</th><th>Início</th><th>Fim</th></tr>
+        <tr><td style="padding:8px">Seg 02</td><td>12</td><td>06:00</td><td>14:30</td></tr>
+        <tr><td style="padding:8px">Ter 03</td><td>Folga</td><td>—</td><td>—</td></tr>
+        <tr><td style="padding:8px">Qua 04</td><td>12</td><td>06:00</td><td>14:30</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="view-comunicados" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Comunicados</h2>
+    <ul style="margin-top:12px;padding-left:20px;line-height:1.8">
+      <li><strong>04/11</strong> — Alteração de percurso na linha 728 a partir de segunda-feira.</li>
+      <li><strong>01/11</strong> — Reunião de motoristas na base de Setúbal às 10:00.</li>
+    </ul>
+  </div>
+</div>
+
+<div id="view-perfil" class="container tab-view" style="display:none">
+  <div class="topo"><h2>Perfil</h2>
+    <div style="margin-top:12px;line-height:1.8">
+      <div><strong>Nome:</strong> Armando Sampaio</div>
+      <div><strong>Email:</strong> armando.sampaio@mygestavia.com</div>
+      <div><strong>Base:</strong> Lisboa</div>
+      <div><strong>Matrícula:</strong> M-1842</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -253,7 +339,6 @@ function render() {
     const grelha = document.createElement('div');
     grelha.className = 'grelha';
 
-    // Vertical black bars numbered 1..13, side by side, with horizontal scroll
     for (let f = 1; f <= p.filas; f++) {
       const coluna = document.createElement('div');
       coluna.className = 'coluna-vertical';
@@ -356,6 +441,17 @@ document.getElementById('btnOntem').addEventListener('click', () => {
   document.getElementById('faixa').textContent = 'Ontem · Terça-feira, 3 de novembro de 2026';
   document.getElementById('search').value = '';
   search('');
+});
+
+document.querySelectorAll('#tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#tabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const id = tab.dataset.tab;
+    document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+    document.getElementById('view-' + id).style.display = 'block';
+    document.querySelector('header div').textContent = tab.textContent;
+  });
 });
 
 loadData();
