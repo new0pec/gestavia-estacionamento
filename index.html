@@ -66,14 +66,28 @@
   .faixa { border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; color: #fff; font-weight: 800; }
   .faixa.hoje { background: #16a34a; }
   .faixa.ontem { background: #dc2626; }
-  .parques { display: flex; flex-wrap: wrap; gap: 16px; }
+  .parques {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
   .parque {
-    background: #fff; border-radius: 12px; border: 1px solid var(--border);
-    padding: 12px; flex: 1 1 420px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 12px;
+    width: 100%;
   }
   .parque-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
   .parque-nome { font-weight: 700; font-size: 15px; }
-  .grelha { border: 2px solid #111; border-bottom: none; }
+  .grelha-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 4px;
+    max-width: 100%;
+  }
+  .grelha { border: 2px solid #111; border-bottom: none; min-width: max-content; }
   .fila { display: flex; border-bottom: 3px solid #111; }
   .num-fila {
     width: 28px; display: flex; align-items: center; justify-content: center;
@@ -208,6 +222,9 @@ function render() {
     `;
     parqueEl.appendChild(topo);
 
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grelha-wrapper';
+
     const grelha = document.createElement('div');
     grelha.className = 'grelha';
 
@@ -256,7 +273,8 @@ function render() {
       fila.appendChild(lugares);
       grelha.appendChild(fila);
     }
-    parqueEl.appendChild(grelha);
+    wrapper.appendChild(grelha);
+    parqueEl.appendChild(wrapper);
     container.appendChild(parqueEl);
   });
 }
