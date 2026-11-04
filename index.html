@@ -90,30 +90,31 @@
   }
   .grelha {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 0;
     border: 2px solid #111;
-    border-right: none;
+    border-bottom: none;
     min-width: max-content;
   }
-  .coluna-vertical {
+  .fila-horizontal {
     display: flex;
-    flex-direction: column;
-    border-right: 3px solid #111;
+    flex-direction: row;
+    border-bottom: 3px solid #111;
   }
-  .num-col {
-    height: 24px;
+  .num-fila {
+    width: 28px;
+    min-width: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 11px;
     color: #475569;
-    border-bottom: 1px solid #cbd5e1;
+    border-right: 1px solid #cbd5e1;
     background: #f8fafc;
   }
-  .lugares-vert {
+  .lugares-horz {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 6px;
     padding: 4px;
   }
@@ -251,17 +252,41 @@ function render() {
     const grelha = document.createElement('div');
     grelha.className = 'grelha';
 
+    // Header row with numbers 1..13
+    const header = document.createElement('div');
+    header.className = 'fila-horizontal';
+    header.style.borderBottom = '1px solid #cbd5e1';
+    const headerSpacer = document.createElement('div');
+    headerSpacer.className = 'num-fila';
+    headerSpacer.textContent = '';
+    header.appendChild(headerSpacer);
+    const headerLugares = document.createElement('div');
+    headerLugares.className = 'lugares-horz';
+    for (let f = 1; f <= p.filas; f++) {
+      const h = document.createElement('div');
+      h.style.width = '90px';
+      h.style.textAlign = 'center';
+      h.style.fontSize = '11px';
+      h.style.color = '#475569';
+      h.style.fontWeight = '700';
+      h.textContent = f;
+      headerLugares.appendChild(h);
+    }
+    header.appendChild(headerLugares);
+    grelha.appendChild(header);
+
+    // Numbers 1..13 go left-to-right; scroll horizontally to see them all
     for (let c = 1; c <= p.colunas; c++) {
-      const coluna = document.createElement('div');
-      coluna.className = 'coluna-vertical';
+      const fila = document.createElement('div');
+      fila.className = 'fila-horizontal';
 
       const num = document.createElement('div');
-      num.className = 'num-col';
+      num.className = 'num-fila';
       num.textContent = c;
-      coluna.appendChild(num);
+      fila.appendChild(num);
 
       const lugares = document.createElement('div');
-      lugares.className = 'lugares-vert';
+      lugares.className = 'lugares-horz';
 
       for (let f = 1; f <= p.filas; f++) {
         const lugar = document.createElement('div');
@@ -293,8 +318,8 @@ function render() {
         }
         lugares.appendChild(lugar);
       }
-      coluna.appendChild(lugares);
-      grelha.appendChild(coluna);
+      fila.appendChild(lugares);
+      grelha.appendChild(fila);
     }
     wrapper.appendChild(grelha);
     parqueEl.appendChild(wrapper);
