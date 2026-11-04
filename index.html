@@ -155,7 +155,19 @@
     0%, 100% { transform: rotate(135deg) scale(1); opacity: 1; }
     50% { transform: rotate(135deg) scale(1.15); opacity: 0.85; }
   }
-  .empty-slot { width: 82px; height: 46px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc; }
+  .bus.dragging {
+    opacity: 0.85;
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    z-index: 100;
+    pointer-events: none;
+    position: fixed;
+    margin: 0;
+  }
+  .lugar.drop-target {
+    outline: 3px dashed #16a34a;
+    background: rgba(22,163,74,0.08);
+  }
   .loading { text-align: center; padding: 40px; color: var(--muted); }
 </style>
 </head>
@@ -375,6 +387,9 @@ function render() {
               <span class="tag${cls ? ' ' + cls : ''}">${getTag(bus.estado)}</span>
             </div>
           `;
+          busEl.draggable = true;
+          busEl.addEventListener('dragstart', onDragStart);
+          busEl.addEventListener('touchstart', onTouchStart, { passive: false });
           lugar.appendChild(busEl);
         } else {
           lugar.innerHTML = '<div class="empty-slot"></div>';
@@ -389,6 +404,112 @@ function render() {
     container.appendChild(parqueEl);
   });
 }
+
+let draggedBus = null;
+let dragClone = null;
+let originLugar = null;
+
+function onDragStart(e) {
+  draggedBus = e.target.closest('.bus');
+  originLugar = draggedBus.parentElement;
+  e.dataTransfer.effectAllowed = 'move';
+  draggedBus.classList.add('dragging');
+  setTimeout(() => draggedBus.style.visibility = 'hidden', 0);
+}
+
+function onTouchStart(e) {
+  e.preventDefault();
+  draggedBus = e.target.closest('.bus');
+  if (!draggedBus) return;
+  originLugar = draggedBus.parentElement;
+
+  const touch = e.touches[0];
+  dragClone = draggedBus.cloneNode(true);
+  dragClone.classList.add('dragging');
+  dragClone.style.left = (touch.clientX - 41) + 'px';
+  dragClone.style.top = (touch.clientY - 23) + 'px';
+  document.body.appendChild(dragClone);
+  draggedBus.style.opacity = '0.3';
+
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!dragClone) return;
+  const touch = e.touches[0];
+  dragClone.style.left = (touch.clientX - 41) + 'px';
+  dragClone.style.top = (touch.clientY - 23) + 'px';
+
+  document.querySelectorAll('.lugar.drop-target').forEach(el => el.classList.remove('drop-target'));
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const lugar = el && el.closest('.lugar');
+  if (lugar && lugar !== originLugar) lugar.classList.add('drop-target');
+}
+
+function onTouchEnd(e) {
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+  if (dragClone) dragClone.remove();
+  dragClone = null;
+  if (draggedBus) draggedBus.style.opacity = '';
+
+  const touch = e.changedTouches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const targetLugar = el && el.closest('.lugar');
+  finishDrop(targetLugar);
+
+  document.querySelectorAll('.lugar.drop-target').forEach(el => el.classList.remove('drop-target'));
+  draggedBus = null;
+  originLugar = null;
+}
+
+function finishDrop(targetLugar) {
+  if (!draggedBus || !targetLugar || targetLugar === originLugar) {
+    if (draggedBus) {
+      draggedBus.classList.remove('dragging');
+      draggedBus.style.visibility = '';
+    }
+    return;
+  }
+
+  const existing = targetLugar.querySelector('.bus');
+  if (existing) {
+    originLugar.appendChild(existing);
+  } else {
+    const empty = targetLugar.querySelector('.empty-slot');
+    if (empty) empty.remove();
+  }
+
+  if (!originLugar.querySelector('.bus')) {
+    originLugar.innerHTML = '<div class="empty-slot"></div>';
+  }
+
+  targetLugar.appendChild(draggedBus);
+  draggedBus.classList.remove('dragging');
+  draggedBus.style.visibility = '';
+}
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const lugar = e.target.closest('.lugar');
+  document.querySelectorAll('.lugar.drop-target').forEach(el => el.classList.remove('drop-target'));
+  if (lugar && lugar !== originLugar) lugar.classList.add('drop-target');
+});
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const targetLugar = e.target.closest('.lugar');
+  finishDrop(targetLugar);
+  document.querySelectorAll('.lugar.drop-target').forEach(el => el.classList.remove('drop-target'));
+  if (draggedBus) {
+    draggedBus.classList.remove('dragging');
+    draggedBus.style.visibility = '';
+  }
+  draggedBus = null;
+  originLugar = null;
+});
 
 function search(query) {
   const num = query.replace(/\D/g, '').replace(/^0+/, '');
