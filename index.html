@@ -87,13 +87,35 @@
     border-radius: 4px;
     max-width: 100%;
   }
-  .grelha { border: 2px solid #111; border-bottom: none; min-width: max-content; }
-  .fila { display: flex; border-bottom: 3px solid #111; }
-  .num-fila {
-    width: 28px; display: flex; align-items: center; justify-content: center;
-    font-size: 11px; color: #475569; border-right: 1px solid #cbd5e1; background: #f8fafc;
+  .grelha {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    border: 2px solid #111;
+    border-right: none;
+    min-width: max-content;
   }
-  .lugares { display: flex; gap: 6px; padding: 4px; flex: 1; }
+  .coluna-vertical {
+    display: flex;
+    flex-direction: column;
+    border-right: 3px solid #111;
+  }
+  .num-col {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #475569;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+  }
+  .lugares-vert {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px;
+  }
   .lugar { width: 90px; min-height: 56px; display: flex; align-items: center; justify-content: center; position: relative; }
   .bus {
     width: 82px; height: 46px; background: #fff; border: 1.5px solid #334155;
@@ -228,19 +250,19 @@ function render() {
     const grelha = document.createElement('div');
     grelha.className = 'grelha';
 
-    for (let f = 1; f <= p.filas; f++) {
-      const fila = document.createElement('div');
-      fila.className = 'fila';
+    for (let c = 1; c <= p.colunas; c++) {
+      const coluna = document.createElement('div');
+      coluna.className = 'coluna-vertical';
 
       const num = document.createElement('div');
-      num.className = 'num-fila';
-      num.textContent = f;
-      fila.appendChild(num);
+      num.className = 'num-col';
+      num.textContent = c;
+      coluna.appendChild(num);
 
       const lugares = document.createElement('div');
-      lugares.className = 'lugares';
+      lugares.className = 'lugares-vert';
 
-      for (let c = 1; c <= p.colunas; c++) {
+      for (let f = 1; f <= p.filas; f++) {
         const lugar = document.createElement('div');
         lugar.className = 'lugar';
 
@@ -270,8 +292,8 @@ function render() {
         }
         lugares.appendChild(lugar);
       }
-      fila.appendChild(lugares);
-      grelha.appendChild(fila);
+      coluna.appendChild(lugares);
+      grelha.appendChild(coluna);
     }
     wrapper.appendChild(grelha);
     parqueEl.appendChild(wrapper);
