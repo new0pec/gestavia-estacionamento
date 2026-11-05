@@ -263,6 +263,9 @@
 <div id="view-escala" class="container tab-view" style="display:none">
   <div class="topo"><h2>Escala</h2>
     <p>Escala de serviço da semana</p>
+    <button id="btnBuscarArmando" style="margin-top:12px;padding:10px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">
+      Ver horário de Armando (dia seguinte)
+    </button>
     <div style="margin-top:12px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:14px">
         <tr style="background:#f1f5f9"><th style="padding:8px;text-align:left">Dia</th><th>Serviço</th><th>Início</th><th>Fim</th></tr>
@@ -576,6 +579,44 @@ document.querySelectorAll('#tabs .tab').forEach(tab => {
 });
 
 loadData();
+
+document.getElementById('btnBuscarArmando')?.addEventListener('click', () => {
+  const hoje = new Date();
+  const amanha = new Date(hoje);
+  amanha.setDate(hoje.getDate() + 1);
+  const dia = amanha.getDate().toString().padStart(2, '0');
+  const mes = (amanha.getMonth() + 1).toString().padStart(2, '0');
+  const ano = amanha.getFullYear();
+  const dataStr = `${dia}/${mes}/${ano}`;
+
+  const info = {
+    data: dataStr,
+    horario: '06:15 – 14:45',
+    bus: '028',
+    condutor: 'Armando Sampaio'
+  };
+
+  const popup = document.createElement('div');
+  popup.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex;
+    align-items: center; justify-content: center; z-index: 9999;
+  `;
+  popup.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+      <h3 style="margin:0 0 12px 0;font-size:18px">Horário de Armando</h3>
+      <p style="margin:0 0 16px 0;color:#64748b">Dia seguinte: ${info.data}</p>
+      <div style="line-height:1.8;font-size:15px">
+        <div><strong>Horário:</strong> ${info.horario}</div>
+        <div><strong>BUS:</strong> ${info.bus}</div>
+        <div><strong>Condutor:</strong> ${info.condutor}</div>
+      </div>
+      <button id="fecharPopup" style="margin-top:20px;width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Fechar</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById('fecharPopup').onclick = () => popup.remove();
+  popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
+});
 </script>
 </body>
 </html>
