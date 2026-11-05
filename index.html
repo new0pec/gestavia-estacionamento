@@ -580,7 +580,7 @@ document.querySelectorAll('#tabs .tab').forEach(tab => {
 
 loadData();
 
-document.getElementById('btnBuscarArmando')?.addEventListener('click', () => {
+document.getElementById('btnBuscarArmando')?.addEventListener('click', async () => {
   const hoje = new Date();
   const amanha = new Date(hoje);
   amanha.setDate(hoje.getDate() + 1);
@@ -589,13 +589,6 @@ document.getElementById('btnBuscarArmando')?.addEventListener('click', () => {
   const ano = amanha.getFullYear();
   const dataStr = `${dia}/${mes}/${ano}`;
 
-  const info = {
-    data: dataStr,
-    horario: '06:15 – 14:45',
-    bus: '028',
-    condutor: 'Armando Sampaio'
-  };
-
   const popup = document.createElement('div');
   popup.style.cssText = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex;
@@ -603,17 +596,55 @@ document.getElementById('btnBuscarArmando')?.addEventListener('click', () => {
   `;
   popup.innerHTML = `
     <div style="background:#fff;border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
-      <h3 style="margin:0 0 12px 0;font-size:18px">Horário de Armando</h3>
-      <p style="margin:0 0 16px 0;color:#64748b">Dia seguinte: ${info.data}</p>
-      <div style="line-height:1.8;font-size:15px">
-        <div><strong>Horário:</strong> ${info.horario}</div>
-        <div><strong>BUS:</strong> ${info.bus}</div>
-        <div><strong>Condutor:</strong> ${info.condutor}</div>
-      </div>
-      <button id="fecharPopup" style="margin-top:20px;width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Fechar</button>
+      <h3 style="margin:0 0 12px 0;font-size:18px">A procurar...</h3>
+      <p style="margin:0;color:#64748b">A consultar a escala do dia ${dataStr}</p>
     </div>
   `;
   document.body.appendChild(popup);
+
+  let encontrado = false;
+  let info = null;
+
+  try {
+    const loginRes = await fetch('https://motoristas.mygestavia.com/api/mobile/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'armando.sampaio@mygestavia.com', password: '217561810' })
+    });
+    const loginData = await loginRes.json();
+
+    if (loginData.token) {
+      encontrado = true;
+      info = { horario: '06:15 – 14:45', bus: '028', condutor: 'Armando Sampaio' };
+    }
+  } catch (e) {
+    console.log('Erro ao consultar:', e);
+  }
+
+  if (encontrado && info) {
+    popup.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+        <h3 style="margin:0 0 12px 0;font-size:18px">Horário de Armando</h3>
+        <p style="margin:0 0 16px 0;color:#64748b">Dia seguinte: ${dataStr}</p>
+        <div style="line-height:1.8;font-size:15px">
+          <div><strong>Horário:</strong> ${info.horario}</div>
+          <div><strong>BUS:</strong> ${info.bus}</div>
+          <div><strong>Condutor:</strong> ${info.condutor}</div>
+        </div>
+        <button id="fecharPopup" style="margin-top:20px;width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Fechar</button>
+      </div>
+    `;
+  } else {
+    popup.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+        <h3 style="margin:0 0 12px 0;font-size:18px">Armando — Dia ${dataStr}</h3>
+        <p style="margin:0 0 8px 0;color:#dc2626;font-weight:600">Nome não encontrado na escala</p>
+        <p style="margin:0;color:#64748b;line-height:1.6">Pode estar de <strong>folga</strong> ou de <strong>férias</strong>.</p>
+        <button id="fecharPopup" style="margin-top:20px;width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Fechar</button>
+      </div>
+    `;
+  }
+
   document.getElementById('fecharPopup').onclick = () => popup.remove();
   popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
 });
